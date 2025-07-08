@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>文化祭 QRコード発行ページ</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 8px 12px;
+      margin: 8px 0;
+    }
+    #qrCanvas {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      display: inline-block;
+    }
+    #message {
+      margin-top: 12px;
+      font-weight: bold;
+      color: #444;
+    }
+    #errorMsg {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>文化祭 QRコード発行</h1>
+  <p>お子様のお名前を入力してください（例：田中 太郎）</p>
+  <input type="text" id="studentName" placeholder="名前を入力" />
+  <button id="generateBtn">QRコードを生成</button>
+
+  <div id="qrArea">
+    <canvas id="qrCanvas"></canvas>
+    <div id="message"></div>
+    <div id="errorMsg"></div>
+  </div>
+
+  <script>
+    const students = {
+      "10001": { name: "田中 太郎", class: "1年1組" },
+      "10002": { name: "佐藤 花子", class: "2年3組" },
+      "10003": { name: "鈴木 一郎", class: "3年2組" },
+      "10004": { name: "山田 美咲", class: "1年2組" },
+      "10005": { name: "中村 大輝", class: "2年1組" }
+    };
+
+    function findStudentIdByName(name) {
+      for (const id in students) {
+        if (students[id].name === name) {
+          return id;
+        }
+      }
+      return null;
+    }
+
+    const qr = new QRious({
+      element: document.getElementById('qrCanvas'),
+      size: 200
+    });
+
+    const generateBtn = document.getElementById('generateBtn');
+    const studentNameInput = document.getElementById('studentName');
+    const messageDiv = document.getElementById('message');
+    const errorMsgDiv = document.getElementById('errorMsg');
+
+    generateBtn.addEventListener('click', () => {
+      const name = studentNameInput.value.trim();
+      errorMsgDiv.textContent = '';
+      messageDiv.textContent = '';
+      qr.value = '';
+
+      if (!name) {
+        errorMsgDiv.textContent = '名前を入力してください。';
+        return;
+      }
+
+      const id = findStudentIdByName(name);
+      if (!id) {
+        errorMsgDiv.textContent = '該当する生徒が見つかりません。名前の入力を確認してください。';
+        return;
+      }
+
+      const url = `${location.origin}/checkin/?id=${id}`;
+      qr.value = url;
+      messageDiv.textContent = `${students[id].name} (${students[id].class}) さんのQRコードです。`;
+    });
+  </script>
+</body>
+</html>
